@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  backend:
+    build: backend
+    command: ["flask", "run", "--host=0.0.0.0", "-p", "3002"]
+    volumes:
+      - ./backend:/backend
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      # we can add the API keys below as they would be set in the container
+      # - OPENAI_API_KEY=''
+      # - SERPAPI_API_KEY=''
+    ports:
+      - "3002:3002"
+
+  frontend:
+    build: frontend
+    entrypoint: [ "nginx", "-g", "daemon off;" ]
+    volumes:
+      - ./frontend:/frontend
+      - node-modules:/frontend/node_modules
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:3002
+    ports:
+      - '3000:80'
+    depends_on:
+      - backend
+
+volumes:
+  node-modules:
